@@ -1,18 +1,29 @@
-import express from 'express'
+import express from "express";
+import { Pool } from "pg";
 
 const app = express();
-
-
-
-const { Pool } = require('pg');
+app.use(express.json());
 
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'Replace',
-  password: '123456',
+  user: "postgres",
+  host: "localhost",
+  database: "Replace",
+  password: "123456",
   port: 5432,
 });
 
+app.get("/health", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT 1 AS ok");
+    res.status(200).json({ status: "ok", db: result.rows?.[0]?.ok ?? 1 });
+  } catch (err) {
+    res.status(500).json({ status: "error", db: "unavailable" });
+  }
+});
 
-module.exports - pool;
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Back-End listening on port ${PORT}`);
+});
+
+export { pool };
